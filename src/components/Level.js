@@ -1,63 +1,60 @@
 // src/components/Level.js
-import React, { useState, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import Task from "./Task";
-import Progress from "./Progress";
+import React, {useRef, useState} from "react";
+import {useParams} from "react-router-dom";
+import {javascriptGenerator} from "blockly/javascript";
+import BlocklyEditor from "./BlocklyEditor";
+import GameView from "./GameView";
 import levels from "../levels";
 
 const Level = () => {
     const { levelId } = useParams();
-    const navigate = useNavigate();
     const levelIndex = parseInt(levelId, 10) - 1;
     const level = levels[levelIndex];
+    const [commands, setCommands] = useState([]);
+    const workspaceRef = useRef(null);
 
-    const [moves, setMoves] = useState(0);
-    const [workspace, setWorkspace] = useState(null);
-
-    const handleMove = () => {
-        setMoves((prevMoves) => prevMoves + 1);
-    };
-
-    const validateLevel = useCallback((workspace) => {
-        return level.validate(workspace);
-    }, [level]);
-
-    const handleLevelCompletion = () => {
-        if (workspace && validateLevel(workspace)) {
-            alert("Level completed!");
-            if (levelIndex < levels.length - 1) {
-                navigate(`/levels/${levelIndex + 2}`); // Przechodzimy do następnego poziomu
-                setMoves(0); // Resetujemy licznik ruchów
-            } else {
-                alert("Congratulations, you have completed all levels!");
-                navigate("/"); // Powrót na stronę główną
-            }
-        } else {
-            alert("Try again!");
+    // Funkcja do podświetlania bloku
+    // Dodanie funkcji do globalnego obiektu `window`
+    window.highlightBlock = (blockId) => {
+        if (workspaceRef.current) {
+            workspaceRef.current.highlightBlock(blockId);
         }
     };
 
-    if (!level) {
-        return <p>Level not found</p>;
-    }
+    const runCode = () => {
+        clearAllHighlights();
+        // Ustawienie `STATEMENT_PREFIX` dla automatycznego podświetlania
+        javascriptGenerator.STATEMENT_PREFIX = "highlightBlock(%1);\n";
+        javascriptGenerator.addReservedWords('highlightBlock');
+
+        const code = javascriptGenerator.workspaceToCode(workspaceRef.current);
+        const commandList = code.split("\n").filter(Boolean);
+        setCommands(commandList);
+    };
+
+    const clearAllHighlights = () => {
+        if (workspaceRef.current) {
+            workspaceRef.current.getAllBlocks().forEach((block) => {
+                block.setHighlighted(false);
+            });
+        }
+    };
 
     return (
-        <div className="text-center w-full">
-            <Task
-                level={level}
-                onMove={handleMove}
-                onWorkspaceInjected={setWorkspace}
-            />
-            {/* Ustawienie Progress i przycisku w jednej linii */}
-            <div className="flex items-center justify-center space-x-4 mt-4">
-                <Progress moves={moves} level={level.id} />
+        <div className="flex flex-col lg:flex-row space-y-6 lg:space-y-0 lg:space-x-6 w-full px-6">
+            <div className="flex flex-col items-start w-full">
+                <BlocklyEditor
+                    toolboxConfiguration={level.toolbox}
+                    onWorkspaceInjected={(workspace) => (workspaceRef.current = workspace)}
+                />
                 <button
-                    onClick={handleLevelCompletion}
-                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
+                    onClick={runCode}
+                    className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
                 >
-                    Check Level
+                    Run Code
                 </button>
             </div>
+            <GameView commands={commands} className="flex-grow" />
         </div>
     );
 };

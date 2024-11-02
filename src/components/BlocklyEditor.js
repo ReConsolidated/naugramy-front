@@ -1,10 +1,31 @@
 // src/components/BlocklyEditor.js
 import React, { useCallback, useRef } from "react";
 import { BlocklyWorkspace } from "react-blockly";
-import * as Blockly from "blockly";
-import "blockly/javascript";
+import * as Blockly from "blockly/core";
 import * as BlocklyMessages from "blockly/msg/en";
+import "../customBlocks"; // Importujemy nasze własne bloki
+
 Blockly.setLocale(BlocklyMessages);
+Blockly.BlockSvg.prototype.setHighlighted = function(highlighted) {
+    if (!this.rendered) {
+        return;
+    }
+    if (highlighted) {
+        this.addSelect();
+        /*
+        this.svgPath_.setAttribute('filter',
+            'url(#' + this.workspace.options.embossFilterId + ')');
+        this.svgPathLight_.style.display = 'none';
+        */
+    } else {
+        this.removeSelect();
+        /*
+        Blockly.utils.removeAttribute(this.svgPath_, 'filter');
+        delete this.svgPathLight_.style.display;
+        */
+    }
+};
+
 
 const BlocklyEditor = ({ onMove, toolboxConfiguration, onWorkspaceInjected }) => {
     const previousBlockCount = useRef(0);
@@ -13,7 +34,7 @@ const BlocklyEditor = ({ onMove, toolboxConfiguration, onWorkspaceInjected }) =>
         (workspace) => {
             const currentBlockCount = workspace.getAllBlocks(false).length;
             if (currentBlockCount !== previousBlockCount.current) {
-                onMove();
+                onMove && onMove(); // Wywołaj onMove, jeśli jest przekazane
                 previousBlockCount.current = currentBlockCount;
             }
         },
@@ -44,7 +65,7 @@ const BlocklyEditor = ({ onMove, toolboxConfiguration, onWorkspaceInjected }) =>
                     onDispose={() => console.log("Workspace disposed")}
                     onInject={(workspace) => {
                         console.log("Workspace injected", workspace);
-                        onWorkspaceInjected(workspace); // Przekazujemy workspace do App.js
+                        onWorkspaceInjected(workspace);
                     }}
                     onWorkspaceChange={handleWorkspaceChange}
                 />
