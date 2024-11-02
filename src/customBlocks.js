@@ -25,6 +25,16 @@ Blockly.defineBlocksWithJsonArray([
         nextStatement: null,
         colour: 160,
     },
+    {
+        type: "on_start",
+        message0: "on start",
+        nextStatement: null, // Pozwala na podłączenie bloków poniżej
+        colour: 230,
+        tooltip: "Blok startowy. Wykonuje podłączone do niego bloki.",
+        helpUrl: "",
+        deletable: false,
+        movable: false,
+    },
 ]);
 
 // Generowanie kodu JavaScript dla bloków
@@ -38,4 +48,9 @@ javascriptGenerator.forBlock["turn_left"] = function () {
 
 javascriptGenerator.forBlock["turn_right"] = function () {
     return "turnRight();\n";
+};
+
+// Generator kodu dla bloku `on_start`
+javascriptGenerator.forBlock["on_start"] = function (block) {
+    return "";
 };
