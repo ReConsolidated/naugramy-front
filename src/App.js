@@ -8,7 +8,7 @@ const App = () => {
     return (
         <Router>
             <div className="min-h-screen flex flex-col items-center justify-center bg-blue-50">
-                <h1 className="text-3xl font-bold mb-6">Gamified Learning Platform</h1>
+                <h1 className="text-3xl font-bold mb-6">Naugramy - work in progress</h1>
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/levels/:levelId" element={<Level />} />

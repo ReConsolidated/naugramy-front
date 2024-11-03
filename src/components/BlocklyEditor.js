@@ -34,30 +34,29 @@ const BlocklyEditor = ({ onMove, toolboxConfiguration, initialXml, onWorkspaceIn
     );
 
     return (
-        <div className="p-6 bg-gray-50 rounded-lg shadow-md w-full mx-auto">
-            <h2 className="text-xl font-bold mb-4">Blockly Editor</h2>
-            <div className="w-full h-96">
-                <BlocklyWorkspace
-                    toolboxConfiguration={toolboxConfiguration}
-                    workspaceConfiguration={{
-                        grid: { spacing: 20, length: 3, colour: "#ccc", snap: true },
-                        trashcan: true,
-                    }}
-                    className="w-full h-full"
-                    initialXml={initialXml}
-                    initialJson={null} // Domyślna wartość dla wymaganego atrybutu
-                    onXmlChange={(xml) => console.log("XML changed:", xml)}
-                    onImportXmlError={(error) => console.error("Import XML error:", error)}
-                    onJsonChange={() => {}} // Pusta funkcja dla wymaganego atrybutu
-                    onImportError={(error) => console.error("Import error:", error)}
-                    onDispose={() => console.log("Workspace disposed")} // Pusta funkcja dla wymaganego atrybutu
-                    onInject={(workspace) => {
-                        console.log("Workspace injected", workspace);
-                        onWorkspaceInjected(workspace);
-                    }}
-                    onWorkspaceChange={handleWorkspaceChange}
-                />
-            </div>
+        <div className="w-full h-96">
+            <BlocklyWorkspace
+                toolboxConfiguration={toolboxConfiguration}
+                workspaceConfiguration={{
+                    grid: {spacing: 20, length: 3, colour: "#ccc", snap: true},
+                    trashcan: true,
+                }}
+                className="w-full h-full"
+                initialXml={initialXml}
+                initialJson={null} // Domyślna wartość dla wymaganego atrybutu
+                onXmlChange={(xml) => {
+                }}
+                onImportXmlError={(error) => console.error("Import XML error:", error)}
+                onJsonChange={() => {
+                }} // Pusta funkcja dla wymaganego atrybutu
+                onImportError={(error) => console.error("Import error:", error)}
+                onDispose={() => console.log("Workspace disposed")} // Pusta funkcja dla wymaganego atrybutu
+                onInject={(workspace) => {
+                    console.log("Workspace injected", workspace);
+                    onWorkspaceInjected(workspace);
+                }}
+                onWorkspaceChange={handleWorkspaceChange}
+            />
         </div>
     );
 };

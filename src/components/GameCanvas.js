@@ -1,21 +1,23 @@
 // src/components/GameCanvas.js
 import React, { useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 
-const GRID_SIZE = 5;
-const TILE_SIZE = 64;
 
-const GameCanvas = forwardRef(({ startPosition, startDirection, obstacles, goalPosition, goalCheck, onLevelComplete }, ref) => {
+
+const GameCanvas = forwardRef(({ level, startPosition, startDirection, obstacles, goalPosition, goalCheck, onLevelComplete }, ref) => {
     const canvasRef = useRef(null);
     const positionRef = useRef(startPosition);
     const directionRef = useRef(startDirection);
-    let ctx = null; // Kontekst rysowania
+    const BOARD_SIZE = 320;
+    const GRID_SIZE = level.gridSize;
+    const TILE_SIZE = BOARD_SIZE / GRID_SIZE;
+    let ctx = null;
 
     useEffect(() => {
         if (canvasRef.current) {
             ctx = canvasRef.current.getContext("2d");
 
-            canvasRef.current.width = GRID_SIZE * TILE_SIZE;
-            canvasRef.current.height = GRID_SIZE * TILE_SIZE;
+            canvasRef.current.width = BOARD_SIZE;
+            canvasRef.current.height = BOARD_SIZE;
 
             resetCanvas();
             drawObstacles();
@@ -32,7 +34,9 @@ const GameCanvas = forwardRef(({ startPosition, startDirection, obstacles, goalP
     };
 
     const resetPosition = () => {
+        console.log("reseting position");
         if (ctx) { // Ponownie sprawdzamy `ctx`
+            console.log('ctx present');
             positionRef.current = startPosition;
             directionRef.current = startDirection;
             resetCanvas();
@@ -89,29 +93,19 @@ const GameCanvas = forwardRef(({ startPosition, startDirection, obstacles, goalP
     };
 
     useImperativeHandle(ref, () => ({
-        executeCommands,
+        executeCode,
         resetPosition
     }));
 
-    const executeCommands = async (commands) => {
-        for (const command of commands) {
-            await executeCommand(command);
+    const executeCode = async (code) => {
+        console.log(code);
+        try {
+            await eval(`(async () => { ${code} })()`);
+        } catch (e) {
+            console.error(`Error executing code: ${code}`, e);
         }
-        checkGoal();
         eval('highlightBlock(null)'); // Reset podświetlenia
-    };
-
-    const executeCommand = (command) => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                try {
-                    eval(command); // Wykonujemy komendę jako JavaScript
-                } catch (e) {
-                    console.error(`Error executing command: ${command}`, e);
-                }
-                resolve();
-            }, 300);
-        });
+        checkGoal();
     };
 
     const moveForward = () => {
@@ -121,7 +115,11 @@ const GameCanvas = forwardRef(({ startPosition, startDirection, obstacles, goalP
         if (directionRef.current === "left") newPosition.x = Math.max(0, newPosition.x - 1);
         if (directionRef.current === "right") newPosition.x = Math.min(GRID_SIZE - 1, newPosition.x + 1);
 
-        positionRef.current = newPosition;
+        // Check if the new position is any type of obstacle
+        const isObstacle = obstacles.some(obstacle => obstacle.x === newPosition.x && obstacle.y === newPosition.y);
+        if (!isObstacle) {
+            positionRef.current = newPosition;
+        }
 
         resetCanvas();
         drawObstacles();
@@ -141,9 +139,11 @@ const GameCanvas = forwardRef(({ startPosition, startDirection, obstacles, goalP
     };
 
     const checkGoal = () => {
+        console.log("Checking goal");
         const state = { position: positionRef.current, direction: directionRef.current };
         if (goalCheck(state)) {
             onLevelComplete();
+            console.log("Level complete");
         }
     };
 
