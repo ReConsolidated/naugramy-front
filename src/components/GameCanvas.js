@@ -104,11 +104,12 @@ const GameCanvas = forwardRef(({ level, startPosition, startDirection, obstacles
         } catch (e) {
             console.error(`Error executing code: ${code}`, e);
         }
-        eval('highlightBlock(null)'); // Reset podświetlenia
+        await eval('highlightBlock(null)'); // Reset podświetlenia
         checkGoal();
     };
 
     const moveForward = () => {
+        console.log('goin forward');
         const newPosition = { ...positionRef.current };
         if (directionRef.current === "up") newPosition.y = Math.max(0, newPosition.y - 1);
         if (directionRef.current === "down") newPosition.y = Math.min(GRID_SIZE - 1, newPosition.y + 1);
